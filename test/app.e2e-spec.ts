@@ -72,5 +72,55 @@ describe('App e2e', () => {
           .expectStatus(201);
       });
     });
+    describe('Signin', () => {
+      it('should throw an error if email is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            password: '123456789',
+          })
+          .expectStatus(400);
+      });
+
+      it('should throw an error if password is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            enail: 'example@example.com',
+          })
+          .expectStatus(400);
+      });
+
+      it('should throw an error if no body is provided', () => {
+        return pactum.spec().post('/auth/signin').expectStatus(400);
+      });
+
+      it('should signin', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody(dto)
+          .expectStatus(200)
+          .stores('userAt', 'access_token');
+      });
+    });
+  });
+
+  describe('User', () => {
+    describe('Get user', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().get('/user').expectStatus(401);
+      });
+
+      it('should get current user', () => {
+        return pactum
+          .spec()
+          .get('/user')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200);
+      });
+    });
   });
 });
