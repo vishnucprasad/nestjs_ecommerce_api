@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
+import { AddProductDto } from 'src/product/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -73,6 +74,7 @@ describe('App e2e', () => {
           .expectStatus(201);
       });
     });
+
     describe('Signin', () => {
       it('should throw an error if email is empty', () => {
         return pactum
@@ -142,8 +144,51 @@ describe('App e2e', () => {
           .withBody(dto)
           .expectStatus(200)
           .expectBodyContains(dto.firstName)
-          .expectBodyContains(dto.lastName)
-          .inspect();
+          .expectBodyContains(dto.lastName);
+      });
+    });
+  });
+
+  describe('Product', () => {
+    describe('Get empty products list', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().get('/product').expectStatus(401);
+      });
+
+      it('should get empty products list', () => {
+        return pactum
+          .spec()
+          .get('/product')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+
+    describe('Add new product', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().post('/product').expectStatus(401);
+      });
+
+      it('should add new product', () => {
+        const dto: AddProductDto = {
+          title: 'Iphone 14 Pro',
+          price: 159900.0,
+          images: [
+            'https://images.pexels.com/photos/16005007/pexels-photo-16005007.jpeg',
+            'https://images.pexels.com/photos/13939986/pexels-photo-13939986.jpeg',
+          ],
+        };
+
+        return pactum
+          .spec()
+          .post('/product')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(201)
+          .expectBodyContains(dto.title)
+          .expectBodyContains(dto.price)
+          .expectBodyContains(dto.images);
       });
     });
   });
