@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
-import { AddProductDto } from 'src/product/dto';
+import { AddProductDto, EditProductDto } from 'src/product/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -214,6 +214,60 @@ describe('App e2e', () => {
           .withBearerToken('$S{userAt}')
           .expectStatus(200)
           .expectBodyContains('$S{productId}');
+      });
+    });
+
+    describe('Edit product by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .patch('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should edit product by id', () => {
+        const dto: EditProductDto = {
+          description:
+            'The iPhone 14 Pro display has rounded corners that follow a beautiful curved design, and these corners are within a standard rectangle. When measured as a standard rectangular shape, the screen is 6.12 inches diagonally (actual viewable area is less).',
+        };
+
+        return pactum
+          .spec()
+          .patch('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.description);
+      });
+    });
+
+    describe('Delete product by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .delete('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should delete product by id', () => {
+        return pactum
+          .spec()
+          .delete('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .expectStatus(204)
+          .expectBody('');
       });
     });
   });

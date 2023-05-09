@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -10,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '../auth/guard';
-import { AddProductDto } from './dto';
+import { AddProductDto, EditProductDto } from './dto';
 import { ProductService } from './product.service';
 
 @UseGuards(JwtGuard)
@@ -33,9 +35,17 @@ export class ProductController {
     return this.productService.addProduct(dto);
   }
 
-  @Patch()
-  editProductById() {}
+  @Patch(':id')
+  editProductById(
+    @Param('id', ParseIntPipe) productId: number,
+    @Body() dto: EditProductDto,
+  ) {
+    return this.productService.editProductById(productId, dto);
+  }
 
-  @Delete()
-  deleteProductById() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteProductById(@Param('id', ParseIntPipe) productId: number) {
+    return this.productService.deleteProductById(productId);
+  }
 }
