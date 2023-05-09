@@ -11,12 +11,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getUser(@GetUser() user: User) {
+  getUser(@GetUser() user: User): User {
     return user;
   }
 
   @Patch()
-  editUser(@GetUser('id') userId: number, @Body() dto: EditUserDto) {
+  editUser(
+    @GetUser('id') userId: number,
+    @Body() dto: EditUserDto,
+  ): Promise<User> {
     return this.userService.editUser(userId, dto);
   }
 }
