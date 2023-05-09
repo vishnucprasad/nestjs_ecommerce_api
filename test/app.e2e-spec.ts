@@ -188,7 +188,32 @@ describe('App e2e', () => {
           .expectStatus(201)
           .expectBodyContains(dto.title)
           .expectBodyContains(dto.price)
-          .expectBodyContains(dto.images);
+          .expectBodyContains(dto.images)
+          .stores('productId', 'id');
+      });
+    });
+
+    describe('Get product by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .get('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should get product by id', () => {
+        return pactum
+          .spec()
+          .get('/product/{id}')
+          .withPathParams({
+            id: '$S{productId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBodyContains('$S{productId}');
       });
     });
   });

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
@@ -18,7 +19,9 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get(':id')
-  getProductById(@Param('id') productId: number) {}
+  getProductById(@Param('id', ParseIntPipe) productId: number) {
+    return this.productService.getProductById(productId);
+  }
 
   @Get()
   getAllProducts() {

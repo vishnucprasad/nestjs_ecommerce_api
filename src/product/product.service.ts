@@ -6,7 +6,11 @@ import { AddProductDto } from './dto';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProductById(productId: number) {}
+  async getProductById(productId: number) {
+    return await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+  }
 
   async getAllProducts() {
     return await this.prisma.product.findMany();
