@@ -133,7 +133,7 @@ describe('App e2e', () => {
 
       it('should edit user', () => {
         const dto: EditUserDto = {
-          firstName: 'John',
+          firstName: 'Jhon',
           lastName: 'Doe',
         };
 
