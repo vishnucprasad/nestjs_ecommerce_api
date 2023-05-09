@@ -4,6 +4,7 @@ import * as pactum from 'pactum';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
+import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -21,9 +22,9 @@ describe('App e2e', () => {
       }),
     );
     await app.init();
-    app.listen(3000);
+    app.listen(3001);
 
-    pactum.request.setBaseUrl('http://localhost:3000');
+    pactum.request.setBaseUrl('http://localhost:3001');
 
     prisma = app.get(PrismaService);
     await prisma.cleanDb();
@@ -35,8 +36,8 @@ describe('App e2e', () => {
 
   describe('Auth', () => {
     const dto: AuthDto = {
-      email: 'example@example.com',
-      password: '123456789',
+      email: 'mail@jhondoe.com',
+      password: 'jhondoe',
     };
 
     describe('Signup', () => {
@@ -120,6 +121,29 @@ describe('App e2e', () => {
           .get('/user')
           .withBearerToken('$S{userAt}')
           .expectStatus(200);
+      });
+    });
+
+    describe('Edit user', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().patch('/user').expectStatus(401);
+      });
+
+      it('should edit user', () => {
+        const dto: EditUserDto = {
+          firstName: 'John',
+          lastName: 'Doe',
+        };
+
+        return pactum
+          .spec()
+          .patch('/user')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .expectBodyContains(dto.lastName)
+          .inspect();
       });
     });
   });
