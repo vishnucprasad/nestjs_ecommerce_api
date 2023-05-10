@@ -484,5 +484,19 @@ describe('App e2e', () => {
           .expectStatus(200);
       });
     });
+
+    describe('Get cart', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().get('/cart').expectStatus(401);
+      });
+
+      it('should get cart', () => {
+        return pactum
+          .spec()
+          .get('/cart')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200);
+      });
+    });
   });
 });

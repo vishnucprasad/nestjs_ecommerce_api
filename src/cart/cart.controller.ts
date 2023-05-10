@@ -17,6 +17,11 @@ import { AddtoCartDto } from './dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
+  @Get()
+  async getCart(@GetUser('id') userId: number) {
+    return this.cartService.getCart(userId);
+  }
+
   @HttpCode(HttpStatus.OK)
   @Post()
   addToCart(@GetUser('id') userId: number, @Body() dto: AddtoCartDto) {

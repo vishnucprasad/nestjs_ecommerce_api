@@ -6,6 +6,17 @@ import { AddtoCartDto } from './dto';
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getCart(userId: number) {
+    return await this.prisma.cart.findUnique({
+      where: {
+        userId,
+      },
+      include: {
+        products: true,
+      },
+    });
+  }
+
   async addCart(userId: number, dto: AddtoCartDto) {
     let cart = await this.prisma.cart.findFirst({
       where: {
