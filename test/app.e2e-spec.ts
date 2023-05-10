@@ -172,6 +172,14 @@ describe('App e2e', () => {
         return pactum.spec().post('/product').expectStatus(401);
       });
 
+      it('should throw an error if no body is provided', () => {
+        return pactum
+          .spec()
+          .post('/product')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(400);
+      });
+
       it('should add new product', () => {
         const dto: AddProductDto = {
           title: 'Iphone 14 Pro',
@@ -293,6 +301,14 @@ describe('App e2e', () => {
     describe('Add new address', () => {
       it('should throw an error if no authorization bearer is provided', () => {
         return pactum.spec().post('/address').expectStatus(401);
+      });
+
+      it('should throw an error if no body is provided', () => {
+        return pactum
+          .spec()
+          .post('/address')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(400);
       });
 
       it('should add new address', () => {
