@@ -6,7 +6,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { AddProductDto, EditProductDto } from '../src/product/dto';
-import { AddAddressDto } from '../src/address/dto/';
+import { AddAddressDto, EditAddressDto } from '../src/address/dto/';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -319,7 +319,64 @@ describe('App e2e', () => {
           .expectBodyContains(dto.street)
           .expectBodyContains(dto.city)
           .expectBodyContains(dto.district)
-          .expectBodyContains(dto.state);
+          .expectBodyContains(dto.state)
+          .stores('addressId', 'id');
+      });
+    });
+
+    describe('Get address by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .get('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should get address by id', () => {
+        return pactum
+          .spec()
+          .get('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBodyContains('$S{addressId}');
+      });
+    });
+
+    describe('Edit address by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .patch('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should edit address by id', () => {
+        const dto: EditAddressDto = {
+          landmark: 'Near infopark phase 2',
+          alternativePhone: '8765432109',
+        };
+
+        return pactum
+          .spec()
+          .patch('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains('$S{addressId}')
+          .expectBodyContains(dto.landmark)
+          .expectBodyContains(dto.alternativePhone);
       });
     });
   });
