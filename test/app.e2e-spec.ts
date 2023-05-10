@@ -379,5 +379,29 @@ describe('App e2e', () => {
           .expectBodyContains(dto.alternativePhone);
       });
     });
+
+    describe('Delete address by id', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum
+          .spec()
+          .delete('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .expectStatus(401);
+      });
+
+      it('should delete address by id', () => {
+        return pactum
+          .spec()
+          .delete('/address/{id}')
+          .withPathParams({
+            id: '$S{addressId}',
+          })
+          .withBearerToken('$S{userAt}')
+          .expectStatus(204)
+          .expectBody('');
+      });
+    });
   });
 });

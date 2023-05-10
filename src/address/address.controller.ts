@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -47,5 +50,14 @@ export class AddressController {
     @Body() dto: EditAddressDto,
   ): Promise<Address> {
     return this.addressService.editAddressById(userId, addressId, dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteAddressById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) addressId: number,
+  ): Promise<Address> {
+    return this.addressService.deleteAddressById(userId, addressId);
   }
 }
