@@ -32,7 +32,7 @@ model Address {
   updatedAt DateTime @updatedAt
 
   name     String
-  phone    BigInt
+  phone    String
   pinCode  Int
   locality String
   street   String

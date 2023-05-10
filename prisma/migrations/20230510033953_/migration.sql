@@ -20,7 +20,7 @@ CREATE TABLE "Address" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "phone" BIGINT NOT NULL,
+    "phone" TEXT NOT NULL,
     "pinCode" INTEGER NOT NULL,
     "locality" TEXT NOT NULL,
     "street" TEXT NOT NULL,

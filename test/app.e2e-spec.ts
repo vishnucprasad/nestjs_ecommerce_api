@@ -5,7 +5,8 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
-import { AddProductDto, EditProductDto } from 'src/product/dto';
+import { AddProductDto, EditProductDto } from '../src/product/dto';
+import { AddAddressDto } from '../src/address/dto/';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -285,6 +286,40 @@ describe('App e2e', () => {
           .withBearerToken('$S{userAt}')
           .expectStatus(200)
           .expectBody([]);
+      });
+    });
+
+    describe('Add new address', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().post('/address').expectStatus(401);
+      });
+
+      it('should add new address', () => {
+        const dto: AddAddressDto = {
+          name: 'John Doe',
+          phone: '9876543210',
+          pinCode: 682030,
+          locality: 'Kakkanad',
+          street: 'Kakkanad',
+          city: 'Kochi',
+          district: 'Eranakulam',
+          state: 'Kerala',
+        };
+
+        return pactum
+          .spec()
+          .post('/address')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(201)
+          .expectBodyContains(dto.name)
+          .expectBodyContains(dto.phone)
+          .expectBodyContains(dto.pinCode)
+          .expectBodyContains(dto.locality)
+          .expectBodyContains(dto.street)
+          .expectBodyContains(dto.city)
+          .expectBodyContains(dto.district)
+          .expectBodyContains(dto.state);
       });
     });
   });
