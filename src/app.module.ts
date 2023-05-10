@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { UserController } from './user/user.controller';
 import { ProductModule } from './product/product.module';
 import { AddressModule } from './address/address.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AddressModule } from './address/address.module';
     UserModule,
     ProductModule,
     AddressModule,
+    CartModule,
   ],
   controllers: [UserController],
   providers: [UserService],

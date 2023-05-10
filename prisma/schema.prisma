@@ -22,7 +22,7 @@ model User {
   lastName  String?
 
   adresses Address[]
-  carts    Cart[]
+  cart     Cart[]
   orders   Order[]
 }
 
@@ -53,7 +53,7 @@ model Cart {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
+  products Product[] @relation("CartProduct")
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
@@ -71,7 +71,7 @@ model Product {
   images String[]
 
   description String?
-  carts       Cart[]
+  carts       Cart[]  @relation("CartProduct")
   orders      Order[]
 }
 
