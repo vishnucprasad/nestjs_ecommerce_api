@@ -271,4 +271,21 @@ describe('App e2e', () => {
       });
     });
   });
+
+  describe('Address', () => {
+    describe('Get empty address list', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().get('/address').expectStatus(401);
+      });
+
+      it('should get empty address list', () => {
+        return pactum
+          .spec()
+          .get('/address')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+  });
 });

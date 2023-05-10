@@ -6,6 +6,7 @@ import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { UserController } from './user/user.controller';
 import { ProductModule } from './product/product.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProductModule } from './product/product.module';
     PrismaModule,
     UserModule,
     ProductModule,
+    AddressModule,
   ],
   controllers: [UserController],
   providers: [UserService],

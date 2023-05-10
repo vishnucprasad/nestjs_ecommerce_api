@@ -13,7 +13,7 @@ export class ProductService {
     });
   }
 
-  async getAllProducts(): Promise<Product[]> {
+  async getProducts(): Promise<Product[]> {
     return await this.prisma.product.findMany();
   }
 
