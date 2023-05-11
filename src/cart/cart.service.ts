@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AddtoCartDto } from './dto';
+import { CartDto } from './dto';
 
 @Injectable()
 export class CartService {
@@ -17,7 +21,7 @@ export class CartService {
     });
   }
 
-  async addCart(userId: number, dto: AddtoCartDto) {
+  async addCart(userId: number, dto: CartDto) {
     let cart = await this.prisma.cart.findFirst({
       where: {
         userId,
@@ -55,6 +59,45 @@ export class CartService {
       data: {
         products: {
           connect: { id: product.id },
+        },
+      },
+      include: {
+        products: true,
+      },
+    });
+  }
+
+  async removeFromCart(userId: number, dto: CartDto) {
+    let cart = await this.prisma.cart.findFirst({
+      where: {
+        userId,
+      },
+      include: {
+        products: true,
+      },
+    });
+
+    if (!cart) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: dto.productId,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return await this.prisma.cart.update({
+      where: {
+        id: cart.id,
+      },
+      data: {
+        products: {
+          disconnect: { id: product.id },
         },
       },
       include: {

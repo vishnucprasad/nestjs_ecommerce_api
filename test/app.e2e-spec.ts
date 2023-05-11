@@ -7,7 +7,7 @@ import { AuthDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { AddProductDto, EditProductDto } from '../src/product/dto';
 import { AddAddressDto, EditAddressDto } from '../src/address/dto/';
-import { AddtoCartDto } from '../src/cart/dto';
+import { CartDto } from '../src/cart/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -423,6 +423,28 @@ describe('App e2e', () => {
   });
 
   describe('Cart', () => {
+    it('should add a product to the database', () => {
+      const dto: AddProductDto = {
+        title: 'Iphone 14 Pro',
+        price: 159900.0,
+        images: [
+          'https://images.pexels.com/photos/16005007/pexels-photo-16005007.jpeg',
+          'https://images.pexels.com/photos/13939986/pexels-photo-13939986.jpeg',
+        ],
+      };
+
+      return pactum
+        .spec()
+        .post('/product')
+        .withBearerToken('$S{userAt}')
+        .withBody(dto)
+        .expectStatus(201)
+        .expectBodyContains(dto.title)
+        .expectBodyContains(dto.price)
+        .expectBodyContains(dto.images)
+        .stores('productId', 'id');
+    });
+
     describe('Add to Cart', () => {
       it('should throw an error if no authorization bearer is provided', () => {
         return pactum.spec().post('/cart').expectStatus(401);
@@ -437,7 +459,7 @@ describe('App e2e', () => {
       });
 
       it('should throw an error if provided productId is invalid', () => {
-        const dto: AddtoCartDto = {
+        const dto: CartDto = {
           productId: -1,
         };
 
@@ -449,30 +471,8 @@ describe('App e2e', () => {
           .expectStatus(404);
       });
 
-      it('should add a product to the database', () => {
-        const dto: AddProductDto = {
-          title: 'Iphone 14 Pro',
-          price: 159900.0,
-          images: [
-            'https://images.pexels.com/photos/16005007/pexels-photo-16005007.jpeg',
-            'https://images.pexels.com/photos/13939986/pexels-photo-13939986.jpeg',
-          ],
-        };
-
-        return pactum
-          .spec()
-          .post('/product')
-          .withBearerToken('$S{userAt}')
-          .withBody(dto)
-          .expectStatus(201)
-          .expectBodyContains(dto.title)
-          .expectBodyContains(dto.price)
-          .expectBodyContains(dto.images)
-          .stores('productId', 'id');
-      });
-
       it('should add product to cart', () => {
-        const dto: AddtoCartDto = {
+        const dto: CartDto = {
           productId: pactum.stash.getDataStore()['productId'],
         };
 
@@ -496,6 +496,47 @@ describe('App e2e', () => {
           .get('/cart')
           .withBearerToken('$S{userAt}')
           .expectStatus(200);
+      });
+    });
+
+    describe('Remove from Cart', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().delete('/cart').expectStatus(401);
+      });
+
+      it('should throw an error if no body is provided', () => {
+        return pactum
+          .spec()
+          .delete('/cart')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(400);
+      });
+
+      it('should throw an error if provided productId is invalid', () => {
+        const dto: CartDto = {
+          productId: -1,
+        };
+
+        return pactum
+          .spec()
+          .delete('/cart')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(404);
+      });
+
+      it('should remove product from cart', () => {
+        const dto: CartDto = {
+          productId: pactum.stash.getDataStore()['productId'],
+        };
+
+        return pactum
+          .spec()
+          .delete('/cart')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains([]);
       });
     });
   });

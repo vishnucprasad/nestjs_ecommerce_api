@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -10,7 +11,7 @@ import {
 import { JwtGuard } from '../auth/guard';
 import { CartService } from './cart.service';
 import { GetUser } from '../auth/decorator';
-import { AddtoCartDto } from './dto';
+import { CartDto } from './dto';
 
 @UseGuards(JwtGuard)
 @Controller('cart')
@@ -24,7 +25,12 @@ export class CartController {
 
   @HttpCode(HttpStatus.OK)
   @Post()
-  addToCart(@GetUser('id') userId: number, @Body() dto: AddtoCartDto) {
+  addToCart(@GetUser('id') userId: number, @Body() dto: CartDto) {
     return this.cartService.addCart(userId, dto);
+  }
+
+  @Delete()
+  removeFromCart(@GetUser('id') userId: number, @Body() dto: CartDto) {
+    return this.cartService.removeFromCart(userId, dto);
   }
 }
