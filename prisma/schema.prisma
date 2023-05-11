@@ -72,7 +72,7 @@ model Product {
 
   description String?
   carts       Cart[]  @relation("CartProduct")
-  orders      Order[]
+  orders      Order[] @relation("OrderProduct")
 }
 
 enum OrderStatus {
@@ -88,7 +88,7 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products    Product[]
+  products    Product[]   @relation("OrderProduct")
   orderStatus OrderStatus
 
   addressId Int

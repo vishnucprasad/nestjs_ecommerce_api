@@ -8,6 +8,7 @@ import { EditUserDto } from 'src/user/dto';
 import { AddProductDto, EditProductDto } from '../src/product/dto';
 import { AddAddressDto, EditAddressDto } from '../src/address/dto/';
 import { CartDto } from '../src/cart/dto';
+import { OrderDto } from 'src/order/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -537,6 +538,85 @@ describe('App e2e', () => {
           .withBody(dto)
           .expectStatus(200)
           .expectBodyContains([]);
+      });
+    });
+  });
+
+  describe('Order', () => {
+    it('should add an address to database', () => {
+      const dto: AddAddressDto = {
+        name: 'John Doe',
+        phone: '9876543210',
+        pinCode: 682030,
+        locality: 'Kakkanad',
+        street: 'Kakkanad',
+        city: 'Kochi',
+        district: 'Eranakulam',
+        state: 'Kerala',
+      };
+
+      return pactum
+        .spec()
+        .post('/address')
+        .withBearerToken('$S{userAt}')
+        .withBody(dto)
+        .expectStatus(201)
+        .expectBodyContains(dto.name)
+        .expectBodyContains(dto.phone)
+        .expectBodyContains(dto.pinCode)
+        .expectBodyContains(dto.locality)
+        .expectBodyContains(dto.street)
+        .expectBodyContains(dto.city)
+        .expectBodyContains(dto.district)
+        .expectBodyContains(dto.state)
+        .stores('addressId', 'id');
+    });
+
+    it('should add product to cart', () => {
+      const dto: CartDto = {
+        productId: pactum.stash.getDataStore()['productId'],
+      };
+
+      return pactum
+        .spec()
+        .post('/cart')
+        .withBearerToken('$S{userAt}')
+        .withBody(dto)
+        .expectStatus(200);
+    });
+
+    describe('Get empty orders list', () => {
+      it('should throw an error if no authorization token is provided', () => {
+        return pactum.spec().get('/order').expectStatus(401);
+      });
+
+      it('should get empty orders list', () => {
+        return pactum
+          .spec()
+          .get('/order')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+
+    describe('Checkout cart', () => {
+      it('should throw an error if no authorization bearer is provided', () => {
+        return pactum.spec().post('/order').expectStatus(401);
+      });
+
+      it('should checkout the cart', () => {
+        const dto: OrderDto = {
+          addressId: pactum.stash.getDataStore()['addressId'],
+        };
+
+        return pactum
+          .spec()
+          .post('/order')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(201)
+          .inspect();
       });
     });
   });
