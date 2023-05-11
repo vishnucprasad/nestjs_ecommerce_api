@@ -32,7 +32,7 @@ export class OrderService {
       throw new ForbiddenException('Cart is empty');
     }
 
-    return await this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         userId,
         addressId: dto.addressId,
@@ -45,5 +45,18 @@ export class OrderService {
         products: true,
       },
     });
+
+    await this.prisma.cart.update({
+      where: {
+        userId,
+      },
+      data: {
+        products: {
+          disconnect: order.products.map((product) => ({ id: product.id })),
+        },
+      },
+    });
+
+    return order;
   }
 }
