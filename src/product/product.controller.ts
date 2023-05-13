@@ -11,12 +11,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
+import { AccessGuard } from '../auth/guard';
 import { AddProductDto, EditProductDto } from './dto';
 import { ProductService } from './product.service';
 import { Product } from '@prisma/client';
 
-@UseGuards(JwtGuard)
+@UseGuards(AccessGuard)
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

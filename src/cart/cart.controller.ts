@@ -8,12 +8,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
+import { AccessGuard } from '../auth/guard';
 import { CartService } from './cart.service';
 import { GetUser } from '../auth/decorator';
 import { CartDto } from './dto';
 
-@UseGuards(JwtGuard)
+@UseGuards(AccessGuard)
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}

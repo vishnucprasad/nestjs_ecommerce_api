@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from '../auth/decorator';
-import { JwtGuard } from '../auth/guard';
+import { AccessGuard } from '../auth/guard';
 import { OrderService } from './order.service';
 import { Order } from '@prisma/client';
 import { OrderDto } from './dto';
 
-@UseGuards(JwtGuard)
+@UseGuards(AccessGuard)
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}

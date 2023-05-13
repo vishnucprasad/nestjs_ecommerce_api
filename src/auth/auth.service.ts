@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto } from './dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +16,9 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async signup(dto: AuthDto): Promise<{ access_token: string }> {
+  async signup(
+    dto: AuthDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const hash = await argon.hash(dto.password);
 
     try {
@@ -26,7 +30,13 @@ export class AuthService {
       });
 
       delete user.hash;
-      return this.signToken(user.id);
+      const accessToken = await this.signAccessToken(user.id);
+      const refreshToken = await this.signRefreshToken(user.id);
+
+      return {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      };
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError ||
@@ -39,7 +49,9 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto): Promise<{ access_token: string }> {
+  async signin(
+    dto: AuthDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -55,23 +67,55 @@ export class AuthService {
       throw new ForbiddenException('Credentials incorrect');
     }
 
-    return this.signToken(user.id);
+    const accessToken = await this.signAccessToken(user.id);
+    const refreshToken = await this.signRefreshToken(user.id);
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 
-  async signToken(userId: number): Promise<{ access_token: string }> {
+  async refreshToken(
+    dto: RefreshTokenDto,
+    user: User,
+  ): Promise<{
+    access_token: string;
+  }> {
+    const accessToken = await this.signAccessToken(user.id);
+
+    return {
+      access_token: accessToken,
+    };
+  }
+
+  async signAccessToken(userId: number): Promise<string> {
     const payload = {
       sub: userId,
     };
 
-    const secret = this.config.get('JWT_SECRET');
+    const secret = this.config.get('ACCESS_TOKEN_SECRET');
 
     const token = await this.jwt.signAsync(payload, {
       expiresIn: '1h',
       secret,
     });
 
-    return {
-      access_token: token,
+    return token;
+  }
+
+  async signRefreshToken(userId: number): Promise<string> {
+    const payload = {
+      sub: userId,
     };
+
+    const secret = this.config.get('REFRESH_TOKEN_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '60d',
+      secret,
+    });
+
+    return token;
   }
 }

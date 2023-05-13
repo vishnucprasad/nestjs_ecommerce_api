@@ -11,13 +11,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
+import { AccessGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
 import { AddressService } from './address.service';
 import { AddAddressDto, EditAddressDto } from './dto';
 import { Address } from '@prisma/client';
 
-@UseGuards(JwtGuard)
+@UseGuards(AccessGuard)
 @Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}

@@ -9,6 +9,7 @@ import { AddProductDto, EditProductDto } from '../src/product/dto';
 import { AddAddressDto, EditAddressDto } from '../src/address/dto/';
 import { CartDto } from '../src/cart/dto';
 import { OrderDto } from 'src/order/dto';
+import { RefreshTokenDto } from 'src/auth/dto/refresh-token.dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -107,6 +108,38 @@ describe('App e2e', () => {
         return pactum
           .spec()
           .post('/auth/signin')
+          .withBody(dto)
+          .expectStatus(200)
+          .stores('userAt', 'access_token')
+          .stores('userRefresh', 'refresh_token');
+      });
+    });
+
+    describe('Refresh token', () => {
+      it('should throw an error if provided refresh token is invalid', () => {
+        const dto: RefreshTokenDto = {
+          refreshToken: 'invalid',
+        };
+
+        return pactum
+          .spec()
+          .post('/auth/refresh')
+          .withBody(dto)
+          .expectStatus(401);
+      });
+
+      it('should throw an error if no body is provided', () => {
+        return pactum.spec().post('/auth/refresh').expectStatus(401);
+      });
+
+      it('should refresh token', () => {
+        const dto: RefreshTokenDto = {
+          refreshToken: pactum.stash.getDataStore()['userRefresh'],
+        };
+
+        return pactum
+          .spec()
+          .post('/auth/refresh')
           .withBody(dto)
           .expectStatus(200)
           .stores('userAt', 'access_token');
@@ -615,8 +648,7 @@ describe('App e2e', () => {
           .post('/order')
           .withBearerToken('$S{userAt}')
           .withBody(dto)
-          .expectStatus(201)
-          .inspect();
+          .expectStatus(201);
       });
     });
   });

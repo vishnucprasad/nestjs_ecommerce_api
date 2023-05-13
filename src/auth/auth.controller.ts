@@ -1,6 +1,17 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthDto } from './dto';
 import { AuthService } from './auth.service';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { GetUser } from './decorator';
+import { User } from '@prisma/client';
+import { RefreshGuard } from './guard/refresh-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -15,5 +26,12 @@ export class AuthController {
   @Post('/signin')
   signin(@Body() dto: AuthDto): Promise<{ access_token: string }> {
     return this.authService.signin(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RefreshGuard)
+  @Post('/refresh')
+  refreshToken(@Body() dto: RefreshTokenDto, @GetUser() user: User) {
+    return this.authService.refreshToken(dto, user);
   }
 }
