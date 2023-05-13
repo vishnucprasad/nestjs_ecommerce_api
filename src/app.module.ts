@@ -23,7 +23,5 @@ import { OrderModule } from './order/order.module';
     CartModule,
     OrderModule,
   ],
-  controllers: [UserController],
-  providers: [UserService],
 })
 export class AppModule {}
