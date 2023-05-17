@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   HttpStatus,
   Post,
@@ -12,6 +13,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { GetUser } from './decorator';
 import { User } from '@prisma/client';
 import { RefreshGuard } from './guard/refresh-token.guard';
+import { AccessGuard } from './guard';
 
 @Controller('auth')
 export class AuthController {
@@ -33,5 +35,12 @@ export class AuthController {
   @Post('/refresh')
   refreshToken(@Body() dto: RefreshTokenDto, @GetUser() user: User) {
     return this.authService.refreshToken(dto, user);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AccessGuard)
+  @Delete('/signout')
+  signout(@GetUser('id') userId: number) {
+    return;
   }
 }

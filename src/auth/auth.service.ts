@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -82,11 +86,29 @@ export class AuthService {
   ): Promise<{
     access_token: string;
   }> {
+    const refreshToken = await this.prisma.refreshToken.findFirst({
+      where: {
+        token: dto.refreshToken,
+      },
+    });
+
+    if (!refreshToken) {
+      throw new UnauthorizedException();
+    }
+
     const accessToken = await this.signAccessToken(user.id);
 
     return {
       access_token: accessToken,
     };
+  }
+
+  async signout(userId: number) {
+    return await this.prisma.refreshToken.delete({
+      where: {
+        userId,
+      },
+    });
   }
 
   async signAccessToken(userId: number): Promise<string> {
@@ -114,6 +136,27 @@ export class AuthService {
     const token = await this.jwt.signAsync(payload, {
       expiresIn: '60d',
       secret,
+    });
+
+    const refreshToken = await this.prisma.refreshToken.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (refreshToken) {
+      await this.prisma.refreshToken.delete({
+        where: {
+          id: refreshToken.id,
+        },
+      });
+    }
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userId,
+        token,
+      },
     });
 
     return token;

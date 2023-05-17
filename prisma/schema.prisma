@@ -21,9 +21,10 @@ model User {
   firstName String?
   lastName  String?
 
-  adresses Address[]
-  cart     Cart[]
-  orders   Order[]
+  adresses     Address[]
+  cart         Cart[]
+  orders       Order[]
+  refreshToken RefreshToken[]
 }
 
 model Address {
@@ -95,5 +96,16 @@ model Order {
   address   Address @relation(fields: [addressId], references: [id])
 
   userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  token String
+
+  userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 }
